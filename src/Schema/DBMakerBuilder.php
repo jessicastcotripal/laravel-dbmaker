@@ -138,7 +138,7 @@ class DBMakerBuilder extends Builder {
      * @param  string  $column
      * @return string  DBMaker column type
      */
-    public function getColumnType($table, $column) {
+    public function getColumnType($table, $column, $fullDefinition = false) {
     	$sql = "SELECT TYPE_NAME FROM SYSCOLUMN WHERE TABLE_NAME = '".$table."' AND COLUMN_NAME = '".$column."'";
     	$result = $this->connection->select($sql);
     	$TYPE_NAME = $result['0']['TYPE_NAME'];    	
