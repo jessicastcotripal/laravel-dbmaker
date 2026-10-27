@@ -10,7 +10,6 @@ namespace DBMaker\ODBC\Connectors;
 
 use PDO as PDO;
 use DBMaker\ODBC\DBMakerPdo;
-use DBMaker\ODBC\DBMakerODBCPdo;
 use Illuminate\Database\Connectors\Connector;
 use Illuminate\Database\Connectors\ConnectorInterface;
 
@@ -42,13 +41,9 @@ class DBMakerConnector extends Connector implements ConnectorInterface {
 	 *
 	 * @throws \Exception
 	 */
-	public function createConnection($dsn, array $config, array $options) {
+	public function createConnection($dsn, array $config, array $options): PDO {
 		[$username,$password] = [$config['username'] ?? null,$config['password'] ?? null];
-		try {
-			return $this->createPdoConnection($dsn,$username,$password,$options);
-		} catch (\Exception $e ) {
-			return new DBMakerODBCPdo($dsn,$username,$password,$options);
-		}
+		return $this->createPdoConnection($dsn,$username,$password,$options);
 	}
 	
 	/**
@@ -60,7 +55,7 @@ class DBMakerConnector extends Connector implements ConnectorInterface {
 	 * @param array $options        	
 	 * @return \PDO
 	 */
-	protected function createPdoConnection($dsn,$username,$password,$options) {
+	protected function createPdoConnection($dsn,$username,$password,$options): PDO {
 		return new DBMakerPdo($dsn,$username,$password,$options);
 	}
 	

@@ -11,8 +11,6 @@ namespace DBMaker\ODBC;
 use PDO;
 
 class DBMakerPdo extends PDO {
-    protected $pdo;
-    
     /**
      * Get the column listing for a given table.
      *
@@ -28,8 +26,6 @@ class DBMakerPdo extends PDO {
             $options[PDO::ATTR_CASE] = PDO::CASE_LOWER;
         }
         parent::__construct($dsn, $username, $passwd, $options);
-        $pdo = new PDO($dsn,$username, $passwd, $options);
-        $this->setConnection($pdo);     
     }
     
     /**
@@ -43,20 +39,4 @@ class DBMakerPdo extends PDO {
         return parent::prepare($statement); 
     }
     
-      /**
-     * @return mixed
-     */
-    public function getConnection()
-    {
-        return $this->pdo;
-    }
-
-    /**
-     * @param mixed $connection
-     * @return void
-     */
-    public function setConnection($pdo)
-    {
-        $this->pdo = $pdo;
-    }
 }
