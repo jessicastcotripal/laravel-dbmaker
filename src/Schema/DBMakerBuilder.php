@@ -24,12 +24,40 @@ class DBMakerBuilder extends Builder {
 	 * @return \Illuminate\Database\Schema\Blueprint
 	 */
 	protected function createBlueprint($table,Closure $callback = null) {
-		$prefix = $this->connection->getConfig('prefix_indexes') ? 
-		$this->connection->getConfig('prefix') : '';
+		/** @var Connection $connection */
+		$connection = $this->connection;
+		$blueprintClass = Blueprint::class;
+
+		if ($this->blueprintRequiresConnection($blueprintClass)) {
+			if (isset($this->resolver)) {
+				return call_user_func($this->resolver, $connection, $table, $callback);
+			}
+
+			return new $blueprintClass($connection, $table, $callback);
+		}
+
+		$prefix = $connection->getConfig('prefix_indexes') ?
+		$connection->getConfig('prefix') : '';
 		if(isset($this->resolver)) {
 			return call_user_func($this->resolver,$table,$callback,$prefix);
 		}
-		return new Blueprint($table,$callback,$prefix);
+		return new $blueprintClass($table,$callback,$prefix);
+	}
+
+	/**
+	 * Determine whether the installed Laravel version passes the connection to
+	 * Blueprint's constructor (Laravel 12+) or uses the legacy constructor.
+	 *
+	 * @param string $blueprintClass
+	 * @return bool
+	 */
+	protected function blueprintRequiresConnection($blueprintClass) {
+		$constructor = (new \ReflectionClass($blueprintClass))->getConstructor();
+		$parameters = $constructor ? $constructor->getParameters() : [];
+		$type = $parameters[0]->getType() ?? null;
+
+		return $type instanceof \ReflectionNamedType
+			&& $type->getName() === \Illuminate\Database\Connection::class;
 	}
 	
     /**

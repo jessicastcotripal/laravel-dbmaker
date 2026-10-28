@@ -95,7 +95,18 @@ class DBMakerODBCPdoStatement extends PDOStatement {
 	 * @return array
 	 */
 	public function fetch($option = null, $ignore = null,$ignore2 = null) {
-		return odbc_fetch_object($this->statement);
+		$values = [];
+
+		if (odbc_fetch_into($this->statement, $values) === false) {
+			return false;
+		}
+
+		$row = [];
+		foreach ($values as $index => $value) {
+			$row[odbc_field_name($this->statement, $index + 1)] = $value;
+		}
+
+		return (object) $row;
 	}
 	function &keysToLower(&$obj) {
 		if(is_object($obj)) {

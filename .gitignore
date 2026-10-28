@@ -11,3 +11,5 @@ composer.phar
 phpunit.phar
 /phpunit.xml
 .phpunit.result.cache
+tests/CompatibilityTest.php
+.github/workflows/php.yml

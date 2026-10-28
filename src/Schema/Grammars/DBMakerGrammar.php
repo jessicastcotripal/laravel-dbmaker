@@ -9,6 +9,7 @@
 namespace DBMaker\ODBC\Schema\Grammars;
 
 use RuntimeException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Expression;
@@ -48,7 +49,7 @@ class DBMakerGrammar extends Grammar {
 	 * @return array
 	 */
 	public function compileRenameColumn(Blueprint $blueprint,
-											Fluent $command,Connection $connection) {
+											Fluent $command,?Connection $connection = null) {
 		$from = $this->wrapTable($blueprint);
 		return "ALTER TABLE {$from} MODIFY ("
 				.$this->wrapTable($command->from)."NAME TO "
@@ -66,9 +67,9 @@ class DBMakerGrammar extends Grammar {
 	 * @throws \RuntimeException
 	 */
 	public function compileChange(Blueprint $blueprint,
-									 Fluent $command,Connection $connection) {
+									 Fluent $command,?Connection $connection = null) {
 		$columns = $blueprint->getColumns();
-		return collect($columns)->map(function($column)use($blueprint) {
+		return Collection::make($columns)->map(function($column)use($blueprint) {
 			$columnNmae = $this->wrap($column);
 			$columnType = $this->getType($column);
 			$columnModifiers = $this->addModifiers("",$blueprint,$column);
@@ -162,7 +163,7 @@ class DBMakerGrammar extends Grammar {
 	 */
 	public function compileAdd(Blueprint $blueprint,Fluent $command) {
 		$columns = $this->prefixArray('add column',$this->getColumns($blueprint));		
-		return collect($columns)->map(function($column)use($blueprint) {
+		return Collection::make($columns)->map(function($column)use($blueprint) {
 			return 'alter table '.$this->wrapTable($blueprint).' '.$column;
 		})->all();
 	}
@@ -176,7 +177,7 @@ class DBMakerGrammar extends Grammar {
 	 */
 	public function compileDropColumn(Blueprint $blueprint,Fluent $command) {
 		$columns = $this->prefixArray('drop',$this->wrapArray($command->columns));
-		return collect($columns)->map(function($column)use($blueprint) {
+		return Collection::make($columns)->map(function($column)use($blueprint) {
 			return 'alter table '.$this->wrapTable($blueprint).' '.$column;
 		})->all();	
 	}
@@ -186,7 +187,7 @@ class DBMakerGrammar extends Grammar {
 	 *
 	 * @return string
 	 */
-	public function compileTableExists() {
+	public function compileTableExists($schema = null, $table = null) {
 		return "select * from SYSTABLE where TABLE_NAME = ?";
 	}
 	
@@ -330,7 +331,7 @@ class DBMakerGrammar extends Grammar {
 	 * @return string
 	 */
 	public function compileCreate(Blueprint $blueprint,
-									 Fluent $command,Connection $connection) {
+									 Fluent $command,?Connection $connection = null) {
 		return $sql = $this->compileCreateTable($blueprint,$command,$connection);
 	}
 	

@@ -24,14 +24,17 @@
 		"illuminate/database": "^9.0 || ^10.0 || ^11.0 || ^12.0",
 		"illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0"
 	},
-  	"autoload": { 
+	"autoload": {
 	    "psr-4": {
 		"DBMaker\\ODBC\\": "src/"
 	    },
 	    "classmap": [
 	      "src/"
 	    ]
-	 } ,
+	 },
+	"scripts": {
+		"test:compat": "php tests/CompatibilityTest.php"
+	},
     "extra": {
         "laravel": {
             "providers": [

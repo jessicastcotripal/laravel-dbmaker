@@ -13,10 +13,10 @@ use Closure;
 use RuntimeException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Processors\Processor;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
+use DBMaker\ODBC\DBMakerConnection;
 use DBMaker\ODBC\Query\Grammars\DBMakerGrammar as DBMakerQueryGrammar;
 
 class DBMakerBuilder extends Builder {
@@ -29,12 +29,12 @@ class DBMakerBuilder extends Builder {
 	/**
 	 * Create a new query builder instance.
 	 *
-	 * @param  \Illuminate\Database\ConnectionInterface  $connection
+	 * @param  \DBMaker\ODBC\DBMakerConnection  $connection
 	 * @param  \Illuminate\Database\Query\Grammars\Grammar|null  $grammar
 	 * @param  \Illuminate\Database\Query\Processors\Processor|null  $processor
 	 * @return void
 	 */
-	public function __construct(ConnectionInterface $connection,
+	public function __construct(DBMakerConnection $connection,
 								DBMakerQueryGrammar $grammar=null,Processor $processor = null) {
 		$this->DB_IDCap = $connection->getDB_IDCap();
 		if($this->DB_IDCap === null) {
@@ -117,8 +117,8 @@ class DBMakerBuilder extends Builder {
 			return $this->processor->processSelect($this, $this->runSelect());
 		});
 		if(empty($queryResult)) {
-			return collect();
-		}	
+			return Collection::make();
+		}
 		$column = $this->stripTableForPluck($column);	
 		$key = $this->stripTableForPluck($key);	
 		return is_array ($queryResult[0]) ? 

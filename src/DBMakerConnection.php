@@ -54,7 +54,7 @@ class DBMakerConnection extends Connection {
 	 * @return Dbmaker\Odbc\Query\Grammars\DBMakerGrammar
 	 */
 	protected function getDefaultQueryGrammar() {
-		return $this->withTablePrefix(new QueryGrammar());
+		return $this->makeGrammar(QueryGrammar::class);
 	}
 	
 	/**
@@ -76,7 +76,7 @@ class DBMakerConnection extends Connection {
 	 * @return Dbmaker\Odbc\Schema\Grammars\DBMakerGrammar
 	 */
 	protected function getDefaultSchemaGrammar() {
-		return $this->withTablePrefix(new SchemaGrammar());
+		return $this->makeGrammar(SchemaGrammar::class);
 	}
 	
 	/**
@@ -85,7 +85,36 @@ class DBMakerConnection extends Connection {
 	 * @return Dbmaker\Odbc\Schema\Grammars\DBMakerGrammar
 	 */
 	protected function DefaultSchemaGrammar() {
-		return $this->withTablePrefix(new SchemaGrammar());
+		return $this->makeGrammar(SchemaGrammar::class);
+	}
+
+	/**
+	 * Create a grammar compatible with Laravel 9 through 12.
+	 *
+	 * Laravel 9 uses the table-prefix API, Laravel 10 and 11 use
+	 * setConnection(), and Laravel 12 requires the connection constructor
+	 * argument and no longer exposes withTablePrefix().
+	 *
+	 * @param string $grammarClass
+	 * @return object
+	 */
+	protected function makeGrammar($grammarClass) {
+		$reflection = new \ReflectionClass($grammarClass);
+		$constructor = $reflection->getConstructor();
+
+		if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
+			return new $grammarClass($this);
+		}
+
+		$grammar = new $grammarClass();
+
+		if (method_exists($grammar, 'setConnection')) {
+			$grammar->setConnection($this);
+		} elseif (method_exists($this, 'withTablePrefix')) {
+			$grammar = call_user_func([$this, 'withTablePrefix'], $grammar);
+		}
+
+		return $grammar;
 	}
 	
 	/**
